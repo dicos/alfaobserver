@@ -1,0 +1,7 @@
+*.pyc
+*.py~
+*.html~
+.project
+.pydevproject
+.settings/*
+local_settings.py
