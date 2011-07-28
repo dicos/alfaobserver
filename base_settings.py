@@ -1,7 +1,7 @@
 #-*- coding: utf8 -*-
 
 # fake settings
-DATABASE_STORE = {
+DATABASE = {
     'DRIVERNAME': 'mysql+mysqldb',
     'USERNAME': '',
     'PASSWORD': '',
