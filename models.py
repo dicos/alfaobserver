@@ -44,5 +44,6 @@ class Queue(Base):
     price = Column(Float)
     buy_qty = Column(Float)
     sell_qty = Column(Float)
+    i_last_update = Column(Integer)
     add_datetime = Column(DateTime, default=datetime.datetime.now)
     
