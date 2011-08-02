@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 import datetime
+import time
 
 import win32com.client
 from sqlalchemy.engine.url import URL
@@ -101,6 +102,7 @@ def dispatch(terminal_res, session_db):
         current_time = datetime.datetime.now()
         td = current_time - last_updated_time
         if td < datetime.timedelta(seconds=1):
+            time.sleep(td.microseconds * 100000.0)
             continue
         else:
             last_updated_time = current_time
