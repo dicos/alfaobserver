@@ -53,6 +53,8 @@ def check_trade_types(terminal_res, session_db):
 
 if not check_trade_types(terminal, session):
     raise Exception("Trades_types not valid")
+else:
+    print "trade_types is valid"
 
 
 def get_paper_no(p_code, terminal_res):
@@ -75,6 +77,7 @@ def write_trades(num, i_last_update, terminal_res, session_db):
         i_last_update = trade_info[5]
         trades.append(AllTrade(*trade_info))
     session_db.add_all(trades)
+    print "inserted trades"
     return i_last_update
 
 
@@ -92,6 +95,7 @@ def write_queue(num, terminal_res, session_db):
         del queue_info[4:]
         queues.append(Queue(queue_info))
     session_db.add_all(queues)
+    print "inserted queue"
     return
 
 
@@ -102,7 +106,7 @@ def dispatch(terminal_res, session_db):
         current_time = datetime.datetime.now()
         td = current_time - last_updated_time
         if td < datetime.timedelta(seconds=1):
-            time.sleep(td.microseconds * 100000.0)
+            time.sleep(1)
             continue
         else:
             last_updated_time = current_time
@@ -112,6 +116,8 @@ def dispatch(terminal_res, session_db):
                 i = write_trades(num, i_last_update, terminal_res, session_db)
                 paper_nums[num] = i
             except ValueError:
+                raise ValueError
+                terminal_res.Connected = True
                 continue
             write_queue(num, terminal_res, session_db)
 
