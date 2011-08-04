@@ -106,6 +106,7 @@ def dispatch(terminal_res, session_db):
         current_time = datetime.datetime.now()
         td = current_time - last_updated_time
         if td < datetime.timedelta(seconds=1):
+            print 'sleep 1 second'
             time.sleep(1)
             continue
         else:
@@ -116,8 +117,10 @@ def dispatch(terminal_res, session_db):
                 i = write_trades(num, i_last_update, terminal_res, session_db)
                 paper_nums[num] = i
             except ValueError:
-                raise ValueError
-                terminal_res.Connected = True
+                print 'not data'
+                if terminal_res.Connected == False:
+                    terminal_res.Connected = True
+                    print 'connect'
                 continue
             write_queue(num, terminal_res, session_db)
 
