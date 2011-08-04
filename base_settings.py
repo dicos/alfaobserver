@@ -8,6 +8,7 @@ DATABASE = {
     'HOST': '',
     'PORT': '',
     'DATABASE': '',
+    'QUERY': {'charset': 'utf8',}
 }
 
 # settings for terminal alfadirect

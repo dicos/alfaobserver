@@ -13,7 +13,8 @@ from models import TradeType, AllTrade, Queue
 
 def get_engine(drivername, username, password, host, port, database):
     url = URL(DATABASE['DRIVERNAME'], DATABASE['USERNAME'], DATABASE['PASSWORD'],
-          DATABASE['HOST'], DATABASE['PORT'], DATABASE['DATABASE'])
+              DATABASE['HOST'], DATABASE['PORT'], DATABASE['DATABASE'], 
+              DATABASE['QUERY'])
     engine = create_engine(url)
     return engine
 
@@ -65,38 +66,44 @@ def get_paper_no(p_code, terminal_res):
 
 
 def write_trades(num, i_last_update, terminal_res, session_db):
-    query_trades = "p_code = %s AND i_last_update > %s" % (num, i_last_update,)
+    query_trades = "paper_no = %s AND i_last_update > %s" % (num, i_last_update,)
     trades_str = terminal_res.GetLocalDBData("all_trades", '*', query_trades)
     if len(trades_str) == 0:
         raise ValueError('Not data in table "Trade_Types"')
-    trades = []
     for trade_row_str in trades_str.split("\r\n"):
         if len(trade_row_str) == 0:
             continue
         trade_info = trade_row_str.split("|")
         i_last_update = trade_info[5]
-        trades.append(AllTrade(*trade_info))
-    session_db.add_all(trades)
+        del trade_info[13]
+        session_db.add(AllTrade(*trade_info))
+    session_db.commit()
     print "inserted trades"
     return i_last_update
 
 
 def write_queue(num, terminal_res, session_db):
-    query = "p_code = %s" % num
+    query = "paper_no = %s" % num
     queue_str = terminal_res.GetLocalDBData("queue", '*', query)
     if len(queue_str) == 0:
         raise ValueError('Not data in table "Queue"')
-    queues = []
     for queue_row_str in queue_str.split("\r\n"):
         if len(queue_row_str) == 0:
             continue
         queue_info = queue_row_str.split("|")
         queue_info[0] = num
-        del queue_info[4:]
-        queues.append(Queue(queue_info))
-    session_db.add_all(queues)
+        del queue_info[5:]
+        session_db.add(Queue(*queue_info))
+    session_db.commit()
     print "inserted queue"
     return
+
+
+def reconnect(terminal_res):
+    if terminal_res.Connected == False:
+        terminal_res.Connected = True
+        print 'reconnected...'
+    return terminal_res
 
 
 def dispatch(terminal_res, session_db):
@@ -116,12 +123,15 @@ def dispatch(terminal_res, session_db):
             try:
                 i = write_trades(num, i_last_update, terminal_res, session_db)
                 paper_nums[num] = i
-            except ValueError:
-                print 'not data'
-                if terminal_res.Connected == False:
-                    terminal_res.Connected = True
-                    print 'connect'
+            except ValueError, e:
+                print 'not data trades: ', e
+                reconnect(terminal_res)
                 continue
-            write_queue(num, terminal_res, session_db)
+            try:
+                write_queue(num, terminal_res, session_db)
+            except ValueError, e:
+                print 'not data queue: ', e
+                reconnect(terminal_res)
+                continue
 
 dispatch(terminal, session)
