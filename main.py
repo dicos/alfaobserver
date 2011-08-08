@@ -7,7 +7,7 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from settings import DATABASE, A_USERNAME, A_PASSWORD, PAPERS
+from settings import DATABASE, A_USERNAME, A_PASSWORD, PAPERS, POOL_RECYCLE
 from models import TradeType, AllTrade, Queue
 
 
@@ -15,7 +15,7 @@ def get_engine(drivername, username, password, host, port, database):
     url = URL(DATABASE['DRIVERNAME'], DATABASE['USERNAME'], DATABASE['PASSWORD'],
               DATABASE['HOST'], DATABASE['PORT'], DATABASE['DATABASE'], 
               DATABASE['QUERY'])
-    engine = create_engine(url)
+    engine = create_engine(url, pool_recycle=POOL_RECYCLE)
     return engine
 
 
