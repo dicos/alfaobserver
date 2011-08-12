@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 import datetime
 import time
+import sys
 
 import win32com.client
 from sqlalchemy.engine.url import URL
@@ -89,11 +90,11 @@ def reconnect_ter(terminal_res):
 
 
 def dispatch():
+    terminal = connect_terminal(A_USERNAME, A_PASSWORD)
+
     engine = get_engine(DATABASE['DRIVERNAME'], DATABASE['USERNAME'],
                         DATABASE['PASSWORD'], DATABASE['HOST'], 
                         DATABASE['PORT'], DATABASE['DATABASE'])
-    terminal = connect_terminal(A_USERNAME, A_PASSWORD)
-
     Session = sessionmaker()
     Session.configure(bind=engine)
     session = Session()
@@ -133,5 +134,8 @@ def dispatch():
 while 1:
     try:
         dispatch()
+    except KeyboardInterrupt:
+        print 'exit'
+        sys.exit()
     except:
         print 'some error'
