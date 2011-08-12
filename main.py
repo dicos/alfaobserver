@@ -19,24 +19,12 @@ def get_engine(drivername, username, password, host, port, database):
     return engine
 
 
-engine = get_engine(DATABASE['DRIVERNAME'], DATABASE['USERNAME'],
-                    DATABASE['PASSWORD'], DATABASE['HOST'], 
-                    DATABASE['PORT'], DATABASE['DATABASE'])
-
-
 def connect_terminal(A_USERNAME, A_PASSWORD):
     terminal = win32com.client.Dispatch("ADLite.AlfaDirect")
     terminal.UserName = A_USERNAME
     terminal.Password = A_PASSWORD
     terminal.Connected = True
     return terminal
-
-
-terminal = connect_terminal(A_USERNAME, A_PASSWORD)
-
-Session = sessionmaker()
-Session.configure(bind=engine)
-session = Session()
 
 
 def check_trade_types(terminal_res, session_db):
@@ -50,12 +38,6 @@ def check_trade_types(terminal_res, session_db):
         if row.trd_type_code != trades_types_t[num].split("|")[0]:
             return False
     return True
-
-
-if not check_trade_types(terminal, session):
-    raise Exception("Trades_types not valid")
-else:
-    print "trade_types is valid"
 
 
 def get_paper_no(p_code, terminal_res):
@@ -99,14 +81,28 @@ def write_queue(num, terminal_res, session_db):
     return
 
 
-def reconnect(terminal_res):
+def reconnect_ter(terminal_res):
     if terminal_res.Connected == False:
         terminal_res.Connected = True
         print 'reconnected...'
     return terminal_res
 
 
-def dispatch(terminal_res, session_db):
+def dispatch():
+    engine = get_engine(DATABASE['DRIVERNAME'], DATABASE['USERNAME'],
+                        DATABASE['PASSWORD'], DATABASE['HOST'], 
+                        DATABASE['PORT'], DATABASE['DATABASE'])
+    terminal = connect_terminal(A_USERNAME, A_PASSWORD)
+
+    Session = sessionmaker()
+    Session.configure(bind=engine)
+    session = Session()
+    
+    if not check_trade_types(terminal, session):
+        raise Exception("Trades_types not valid")
+    else:
+        print "trade_types is valid"
+    
     paper_nums = dict([[get_paper_no(v, terminal), '0',] for v in PAPERS])
     last_updated_time = datetime.datetime.now()
     while 1:
@@ -121,17 +117,21 @@ def dispatch(terminal_res, session_db):
         
         for num, i_last_update in paper_nums.items():
             try:
-                i = write_trades(num, i_last_update, terminal_res, session_db)
+                i = write_trades(num, i_last_update, terminal, session)
                 paper_nums[num] = i
             except ValueError, e:
                 print 'not data trades: ', e
-                reconnect(terminal_res)
+                reconnect_ter(terminal)
                 continue
             try:
-                write_queue(num, terminal_res, session_db)
+                write_queue(num, terminal, session)
             except ValueError, e:
                 print 'not data queue: ', e
-                reconnect(terminal_res)
+                reconnect_ter(terminal)
                 continue
 
-dispatch(terminal, session)
+while 1:
+    try:
+        dispatch()
+    except:
+        print 'some error'
