@@ -17,4 +17,5 @@ POOL_RECYCLE = 3600 # 1 hour
 A_USERNAME = ''
 A_PASSWORD = ''
 
-PAPERS = ("RTSI-9.11", "SBER-9.11",)
+PAPERS = ("RTS-12.11", "SBRF-12.11", "ROSN-12.11", "GMKR-12.11", 
+          "GAZR-12.11", "LKOH-12.11", "VTBR-12.11", "Si-12.11", ),
