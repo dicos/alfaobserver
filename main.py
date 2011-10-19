@@ -137,5 +137,5 @@ while 1:
     except KeyboardInterrupt:
         print 'exit'
         sys.exit()
-    except:
-        print 'some error'
+    #except:
+    #    print 'some error'
