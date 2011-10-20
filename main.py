@@ -123,7 +123,6 @@ def dispatch():
             except ValueError, e:
                 print 'not data trades: ', e
                 reconnect_ter(terminal)
-                continue
             try:
                 write_queue(num, terminal, session)
             except ValueError, e:
