@@ -61,7 +61,7 @@ def write_trades(num, i_last_update, terminal_res, session_db):
         del trade_info[13]
         session_db.add(AllTrade(*trade_info))
     session_db.commit()
-    print "inserted trades"
+    print "inserted trades", datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     return i_last_update
 
 
@@ -78,7 +78,7 @@ def write_queue(num, terminal_res, session_db):
         del queue_info[5:]
         session_db.add(Queue(*queue_info))
     session_db.commit()
-    print "inserted queue"
+    print "inserted queue", datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     return
 
 
